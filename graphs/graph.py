@@ -11,9 +11,17 @@ class Graph:
         if edges and sparse:
             self.graph = self.__sparse_from_edges(edges)
 
+    def __get_nodes(self, edges):
+        first = [edge[0] for edge in edges]
+        second = [edge[1] for edge in edges]
+
+        return sorted(set(first + second))
+
+
     def __sparse_from_edges(self, edges):
         '''
-        Creates the graph as a dictionary of edges
+        Creates the graph as a dictionary of nodes and their
+        neighbours
 
         Parameters
         ----------
@@ -27,10 +35,7 @@ class Graph:
             values are the node's neighbours
         '''
 
-        # get a list of all the nodes in the graph
-        first = [edge[0] for edge in edges]
-        second = [edge[1] for edge in edges]
-        nodes = sorted(set(first + second))
+        nodes = self.__get_nodes(edges)
 
         graph = {}
 
