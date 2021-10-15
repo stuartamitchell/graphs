@@ -77,7 +77,7 @@ class Graph:
         '''
 
 if __name__ == '__main__':
-    edges = [(1,2), (3,1), (2,2), (4,1)]
+    edges = [(0,1), (2,0), (1,1), (3,0)]
     graph_edges = Graph(edges=edges)
     graph_edges_directed = Graph(edges=edges, directed=True)
     print(graph_edges.graph)
