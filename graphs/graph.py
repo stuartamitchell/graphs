@@ -12,11 +12,23 @@ class Graph:
             self.graph = self.__sparse_from_edges(edges)
 
     def __get_nodes(self, edges):
+        '''
+        Gets a list of the nodes from a list of edges
+
+        Parameters
+        ----------
+        edges : list
+            a list of the edges in the graph
+
+        Returns
+        -------
+        list
+            a list of the nodes in the graph
+        '''
         first = [edge[0] for edge in edges]
         second = [edge[1] for edge in edges]
 
         return sorted(set(first + second))
-
 
     def __sparse_from_edges(self, edges):
         '''
