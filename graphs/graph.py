@@ -1,85 +1,139 @@
+'''
+Graph class for representing simple graphs with the following optional attibutes:
+    - directed
+    - colored nodes
+    - colored edges 
+    - weighted edges
+'''
+
+__all__ = ['Graph']
+
 class Graph:
     '''
-    A class to represent a graph - directed or undirected, weighted or unweighted
     '''
-    def __init__(
-            self, adj_mat=None, edges=None, directed=False, weighted=False, sparse=True):
+
+    def __init__(self, directed=False, graph_data=None):
+        '''
+        Initialises a (directed) graph with graph data
+
+        Parameters
+        ----------
+        directed : bool (optional, default: False)
+            Is the graph a directed graph? Default value is false.
+
+        graph_data : dict (optional, default: None)
+            A dictionary of graph data
+
+        '''
+
+        self.nodes = {}
         self.directed = directed
-        self.weighted = weighted
-        self.graph = None
-
-        if edges and sparse:
-            self.graph = self.__sparse_from_edges(edges)
-
-    def __get_nodes(self, edges):
-        '''
-        Gets a list of the nodes from a list of edges
-
-        Parameters
-        ----------
-        edges : list
-            a list of the edges in the graph
-
-        Returns
-        -------
-        list
-            a list of the nodes in the graph
-        '''
-        first = [edge[0] for edge in edges]
-        second = [edge[1] for edge in edges]
-
-        return sorted(set(first + second))
-
-    def __sparse_from_edges(self, edges):
-        '''
-        Creates the graph as a dictionary of nodes and their
-        neighbours
-
-        Parameters
-        ----------
-        edges : list
-            a list of the edges in the graph
-
-        Returns
-        -------
-        dict
-            a dictionary keyed by the nodes of the graph whose
-            values are the node's neighbours
-        '''
-
-        nodes = self.__get_nodes(edges)
-
-        graph = {}
-
-        # create an empty dictionary of all the nodes
-        for node in nodes:
-            graph[node] = []
-
-        if self.weighted:
-            for node1, node2, weight in edges:
-                graph[node1].append((node2, weight))
-
-                if not self.directed:
-                    graph[node2].append((node1, weight))
+        
+        if graph_data is None:
+            self.graph = {}
         else:
-            for node1, node2 in edges:
-                graph[node1].append(node2)
+            self.graph = self.__read_graph_data(graph_data)
+        
+    def __read_graph_data(self, graph_data):
+        '''
+        Read graph data supplied to constructor and produce our graph representation
 
-                # if not a directed graph and the edge isn't a loop
-                if not self.directed and node1 != node2:
-                    graph[node2].append(node1)
+        Paramaters
+        ----------
+        graph_data : dict
+            a dictionary of graph data
+
+        Returns
+        -------
+        graph
+            a dictionary representing the graph
+        '''
+        graph = {}
 
         return graph
 
-    def __dense_from_edges(self, edges):
+    def add_node(self, node, color=None):
         '''
-        Creates the graph as an adjacency matrix
+        Adds a node to the graph with the supplied color
+
+        Parameters
+        ----------
+        node : int
+            the name of the node
+
+        color : str (optional, default: None)
+            the color of the node
+        '''
+        attr = { 'adj': [], 'color': color }
+        
+        self.nodes[node] = attr
+    
+    def add_edge(self, node1, node2, color=None, weight=None):
+        '''
+        Adds an edge to the graph with the supplied color and weight.
+
+        Parameters
+        ----------
+        node1 : int
+            the name of a node in the graph, created if not in graph
+
+        node2 : int
+            the name of a node in the graph, created if not in graph
+
+        color : str (optional, default: None)
+            the color of the edge
+        
+        weight : numerical (optional, default: None)
+            the weight of the edge
+        '''
+        attr = { 'color': color, 'weight': weight}
+
+        if node1 not in self.nodes.keys():
+            self.add_node(node1)
+
+        if node2 not in self.nodes.keys():
+            self.add_node(node2)
+        
+        self.nodes[node1]['adj'].append({ node2: attr })
+
+        if not self.directed:
+            self.nodes[node2]['adj'].append({ node1: attr })
+    
+    def color_node(self, node, color):
+        ''''
+        Colors a node
+
+        Paramters
+        ---------
+        node : int
+            the node to be colored, create if the node doesn't exist
+
+        color : str
+            the color of the node
+        '''
+        if node not in self.nodes.keys():
+            self.add_node(node, color)
+        else:
+            self.nodes[node].update({ 'color': color })
+    
+    def color_edge(self, node1, node2):
+        '''
+        
         '''
 
+
 if __name__ == '__main__':
-    edges = [(0,1), (2,0), (1,1), (3,0)]
-    graph_edges = Graph(edges=edges)
-    graph_edges_directed = Graph(edges=edges, directed=True)
-    print(graph_edges.graph)
-    print(graph_edges_directed.graph)
+    graph = Graph()
+    graph.add_edge(0,1)
+    print(graph.nodes)
+
+    graph.color_node(0, 'blue')
+    graph.color_node(1, 'red')
+
+    print(graph.nodes)
+
+    graph.color_node(1, 'green')
+
+    print(graph.nodes)
+        
 
