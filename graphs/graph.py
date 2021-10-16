@@ -72,13 +72,15 @@ class Graph:
         '''
         Adds an edge to the graph with the supplied color and weight.
 
+        Prints error to console if a node does not exist
+
         Parameters
         ----------
         node1 : int
-            the name of a node in the graph, created if not in graph
+            the name of a node in the graph
 
         node2 : int
-            the name of a node in the graph, created if not in graph
+            the name of a node in the graph
 
         color : str (optional, default: None)
             the color of the edge
@@ -88,17 +90,14 @@ class Graph:
         '''
         attr = { 'color': color, 'weight': weight}
 
-        if node1 not in self.nodes.keys():
-            self.add_node(node1)
+        if all(key in self.nodes for key in [node1, node2]):
+            self.nodes[node1]['adj'].update({ node2: attr })
 
-        if node2 not in self.nodes.keys():
-            self.add_node(node2)
-        
-        self.nodes[node1]['adj'].update({ node2: attr })
-
-        if not self.directed:
-            self.nodes[node2]['adj'].update({ node1: attr })
-    
+            if not self.directed:
+                self.nodes[node2]['adj'].update({ node1: attr })
+        else:
+            print('Cannot create edge between {} and {} as one of the nodes does not exist.'.format(node1, node2))
+       
     def color_node(self, node, color):
         ''''
         Colors a node
@@ -120,6 +119,8 @@ class Graph:
         '''
         Colors an edge
 
+        Prints error to console if edge does not exist
+
         Parameters
         ----------
         node1 : int
@@ -132,26 +133,50 @@ class Graph:
             the color of the edge
         '''
 
+        if all(key in self.nodes for key in [node1, node2]):
+            self.nodes[node1]['adj'][node2].update({ 'color': color })
+        else:
+            print('Cannot color edge ({}, {}) since it does not exist.'.format(node1, node2))
 
+    def weigh_edge(self, node1, node2, weight):
+        '''
+        Ads weight to an edge
+
+        Prints error to console if edge does not exist
+
+        Parameters
+        ----------
+        node1 : int
+            the first node of the edge
+
+        node2 : int
+            the second node of the edge
+
+        color : str
+            the color of the edge
+        '''
+
+        if all(key in self.nodes for key in [node1, node2]):
+            self.nodes[node1]['adj'][node2].update({ 'weight': weight })
+        else:
+            print('Cannot add weight to edge ({}, {}) since it does not exist.'.format(node1, node2))
 
 if __name__ == '__main__':
     graph = Graph()
     
     graph.add_node(0)
+    graph.add_node(1)
     print(graph.nodes)
 
-    graph.color_node(1, 'green')
-
-    graph.add_edge(0,1,'blue', 17.0)
-    graph.add_edge(0,2)
-
-    graph.color_node(0, 'blue')
-    graph.color_node(1, 'red')
-
+    graph.add_edge(0,1)
     print(graph.nodes)
 
-    graph.color_node(1, 'green')
+    graph.color_edge(0, 1, 'blue')
+    graph.color_edge(0, 2, 'red')
+    print(graph.nodes)
 
+    graph.weigh_edge(0, 1, '17.0')
+    graph.weigh_edge(0, 2, '12')
     print(graph.nodes)
         
 
