@@ -1,15 +1,15 @@
-'''
-Graph class for representing simple graphs with the following optional attibutes:
-    - directed
-    - colored nodes
-    - colored edges 
-    - weighted edges
-'''
-
 __all__ = ['Graph']
 
 class Graph:
     '''
+    Class for representing simple graphs (loops allowed) with the following optional attibutes:
+    - directed
+    - colored nodes
+    - colored edges 
+    - weighted edges
+
+    Colors and weights can be updated by setter functions.
+
     '''
 
     def __init__(self, directed=False, graph_data=None):
@@ -26,13 +26,12 @@ class Graph:
 
         '''
 
-        self.nodes = {}
         self.directed = directed
         
         if graph_data is None:
-            self.graph = {}
+            self.nodes = {}            
         else:
-            self.graph = self.__read_graph_data(graph_data)
+            self.nodes = self.__read_graph_data(graph_data)
         
     def __read_graph_data(self, graph_data):
         '''
@@ -48,9 +47,20 @@ class Graph:
         graph
             a dictionary representing the graph
         '''
-        graph = {}
 
-        return graph
+        if all(k in graph_data for k in ['directed', 'nodes']):
+            self.directed = graph_data['directed']
+            
+            nodes = {}
+
+            for node in graph_data['nodes']:
+                nodes[node] = graph_data['nodes'][node]
+
+            return nodes
+        else:
+            print('Cannot create graph from given input. Creating empty, undirected graph.')
+            
+            return {}
 
     def add_node(self, node, color=None):
         '''
@@ -67,6 +77,26 @@ class Graph:
         attr = { 'adj': {}, 'color': color }
         
         self.nodes[node] = attr
+
+    def is_node(self, node):
+        '''
+        Checks if a nodes is in the graph or not
+
+        Parameters
+        ----------
+        node : int
+            the node to check
+
+        Returns
+        -------
+        bool
+            true if the node is in the graph, false otherwise
+        '''
+
+        if node in self.nodes:
+            return True
+        else:
+            return False
     
     def add_edge(self, node1, node2, color=None, weight=None):
         '''
@@ -88,9 +118,9 @@ class Graph:
         weight : numerical (optional, default: None)
             the weight of the edge
         '''
-        attr = { 'color': color, 'weight': weight}
+        attr = { 'color': color, 'weight': weight} # note: this means when updating both adj dicts get updated
 
-        if all(key in self.nodes for key in [node1, node2]):
+        if self.is_node(node1) and self.is_node(node2):
             self.nodes[node1]['adj'].update({ node2: attr })
 
             if not self.directed:
@@ -102,18 +132,20 @@ class Graph:
         ''''
         Colors a node
 
+        Prints error to console if node does not exist
+
         Paramters
         ---------
         node : int
-            the node to be colored, throw exception if node doesn't exist
+            the node to be colored
 
         color : str
             the color of the node
         '''
-        try:
+        if self.is_node(node):
             self.nodes[node].update({ 'color': color })
-        except KeyError as e:
-            print('No node named {}'.format(e))
+        else:
+            print('No node named {}'.format(node))
 
     def color_edge(self, node1, node2, color):
         '''
@@ -133,7 +165,7 @@ class Graph:
             the color of the edge
         '''
 
-        if all(key in self.nodes for key in [node1, node2]):
+        if self.is_node(node1) and self.is_node(node2):
             self.nodes[node1]['adj'][node2].update({ 'color': color })
         else:
             print('Cannot color edge ({}, {}) since it does not exist.'.format(node1, node2))
@@ -156,29 +188,50 @@ class Graph:
             the color of the edge
         '''
 
-        if all(key in self.nodes for key in [node1, node2]):
+        if self.is_node(node1) and self.is_node(node2):
             self.nodes[node1]['adj'][node2].update({ 'weight': weight })
         else:
             print('Cannot add weight to edge ({}, {}) since it does not exist.'.format(node1, node2))
 
-    # TO DO: remove_node, remove_edge
+    def remove_edge(self, node1, node2):
+        '''
+        Removes an edge from the graph
 
-if __name__ == '__main__':
-    graph = Graph()
-    
-    graph.add_node(0)
-    graph.add_node(1)
-    print(graph.nodes)
+        Prints error to console if edge does not exist.
 
-    graph.add_edge(0,1)
-    print(graph.nodes)
+        Parameters
+        ----------
+        node1 : int
+            the first node of the edge
 
-    graph.color_edge(0, 1, 'blue')
-    graph.color_edge(0, 2, 'red')
-    print(graph.nodes)
+        node2 : int
+            the second node of the edge
+        '''
 
-    graph.weigh_edge(0, 1, '17.0')
-    graph.weigh_edge(0, 2, '12')
-    print(graph.nodes)
-        
+        if self.is_node(node1) and self.is_node(node2):
+            del self.nodes[node1]['adj'][node2]
 
+            if not self.directed:
+                del self.nodes[node2]['adj'][node1]
+        else:
+            print('Cannote remove edge ({}, {}) since it does not exist.'.format(node1, node2))
+
+    def remove_node(self, node):
+        '''
+        Removes a node from the graph
+
+        Prints error to console if the node does not exist
+
+        Parameters
+        ----------
+        node : int
+            the node to be removed
+        '''
+
+        if self.is_node(node):
+            del self.nodes[node]
+
+            for n in self.nodes:
+                del self.nodes[n]['adj'][node]
+        else:
+            print('Cannote remove a node {} as it does not exist.'.format(node))
