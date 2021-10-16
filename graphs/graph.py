@@ -1,3 +1,5 @@
+import numpy as np
+
 __all__ = ['Graph']
 
 class Graph:
@@ -29,9 +31,9 @@ class Graph:
         self.directed = directed
         
         if graph_data is None:
-            self.nodes = {}            
+            self.graph = {}            
         else:
-            self.nodes = self.__read_graph_data(graph_data)
+            self.graph = self.__read_graph_data(graph_data)
         
     def __read_graph_data(self, graph_data):
         '''
@@ -62,7 +64,7 @@ class Graph:
             
             return {}
 
-    def add_node(self, node, color=None):
+    def add_node(self, color=None):
         '''
         Adds a node to the graph with the supplied color
 
@@ -74,9 +76,10 @@ class Graph:
         color : str (optional, default: None)
             the color of the node
         '''
+        n = len(self.graph)
         attr = { 'adj': {}, 'color': color }
         
-        self.nodes[node] = attr
+        self.graph[n] = attr
 
     def is_node(self, node):
         '''
@@ -93,7 +96,7 @@ class Graph:
             true if the node is in the graph, false otherwise
         '''
 
-        if node in self.nodes:
+        if node in self.graph:
             return True
         else:
             return False
@@ -121,10 +124,10 @@ class Graph:
         attr = { 'color': color, 'weight': weight} # note: this means when updating both adj dicts get updated
 
         if self.is_node(node1) and self.is_node(node2):
-            self.nodes[node1]['adj'].update({ node2: attr })
+            self.graph[node1]['adj'].update({ node2: attr })
 
             if not self.directed:
-                self.nodes[node2]['adj'].update({ node1: attr })
+                self.graph[node2]['adj'].update({ node1: attr })
         else:
             print('Cannot create edge between {} and {} as one of the nodes does not exist.'.format(node1, node2))
        
@@ -143,7 +146,7 @@ class Graph:
             the color of the node
         '''
         if self.is_node(node):
-            self.nodes[node].update({ 'color': color })
+            self.graph[node].update({ 'color': color })
         else:
             print('No node named {}'.format(node))
 
@@ -166,7 +169,7 @@ class Graph:
         '''
 
         if self.is_node(node1) and self.is_node(node2):
-            self.nodes[node1]['adj'][node2].update({ 'color': color })
+            self.graph[node1]['adj'][node2].update({ 'color': color })
         else:
             print('Cannot color edge ({}, {}) since it does not exist.'.format(node1, node2))
 
@@ -189,7 +192,7 @@ class Graph:
         '''
 
         if self.is_node(node1) and self.is_node(node2):
-            self.nodes[node1]['adj'][node2].update({ 'weight': weight })
+            self.graph[node1]['adj'][node2].update({ 'weight': weight })
         else:
             print('Cannot add weight to edge ({}, {}) since it does not exist.'.format(node1, node2))
 
@@ -209,10 +212,10 @@ class Graph:
         '''
 
         if self.is_node(node1) and self.is_node(node2):
-            del self.nodes[node1]['adj'][node2]
+            del self.graph[node1]['adj'][node2]
 
             if not self.directed:
-                del self.nodes[node2]['adj'][node1]
+                del self.graph[node2]['adj'][node1]
         else:
             print('Cannote remove edge ({}, {}) since it does not exist.'.format(node1, node2))
 
@@ -229,9 +232,80 @@ class Graph:
         '''
 
         if self.is_node(node):
-            del self.nodes[node]
+            del self.graph[node]
 
-            for n in self.nodes:
-                del self.nodes[n]['adj'][node]
+            for n in self.graph:
+                del self.graph[n]['adj'][node]
         else:
             print('Cannote remove a node {} as it does not exist.'.format(node))
+    
+    def adjacency(self, node=None):
+        '''
+        Returns the list of neighbours of the supplied node, or for every node
+        in the grpah is node is None
+
+        If node is not in graph, returns the adjacency list for the whole grpah
+
+        Parameters
+        ----------
+        node : int
+            the node whose neighbors are to be returned
+
+        Returns
+        -------
+        list
+            a list of node's neighbours
+
+        OR
+
+        dict
+            a dictionary with a list of the neighbours of each node in the 
+            graph
+
+        '''
+        if node and self.is_node(node):
+            adj = []
+
+            for n in self.graph[node]['adj']:
+                adj.append(n)
+
+            return adj
+        else:
+            adjacency = {}
+
+            for node in self.graph:
+                adj = []
+
+                for n in self.graph[node]['adj']:
+                    adj.append(n)
+                
+                adjacency[node] = adj
+
+            return adjacency
+    
+    def adjacency_matrix(self):
+        adjacency = self.adjacency()
+        adjacency_matrix = np.zeros((len(adjacency), len(adjacency)))
+
+        for node1 in adjacency:
+            for node2 in adjacency[node1]:
+                adjacency_matrix[node1][node2] = 1
+
+        return adjacency_matrix
+
+graph = Graph()
+
+for i in range(0,5):
+    graph.add_node()
+
+for i in range(0, 5):
+    for j in range(0, 5):
+        if i * j % 2 == 0:
+            graph.add_edge(i,j)
+
+print(graph.graph)
+
+adjacency = graph.adjacency()
+
+print(adjacency)
+print(graph.adjacency_matrix())
