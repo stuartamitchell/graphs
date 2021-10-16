@@ -64,7 +64,7 @@ class Graph:
         color : str (optional, default: None)
             the color of the node
         '''
-        attr = { 'adj': [], 'color': color }
+        attr = { 'adj': {}, 'color': color }
         
         self.nodes[node] = attr
     
@@ -94,10 +94,10 @@ class Graph:
         if node2 not in self.nodes.keys():
             self.add_node(node2)
         
-        self.nodes[node1]['adj'].append({ node2: attr })
+        self.nodes[node1]['adj'].update({ node2: attr })
 
         if not self.directed:
-            self.nodes[node2]['adj'].append({ node1: attr })
+            self.nodes[node2]['adj'].update({ node1: attr })
     
     def color_node(self, node, color):
         ''''
@@ -106,26 +106,44 @@ class Graph:
         Paramters
         ---------
         node : int
-            the node to be colored, create if the node doesn't exist
+            the node to be colored, throw exception if node doesn't exist
 
         color : str
             the color of the node
         '''
-        if node not in self.nodes.keys():
-            self.add_node(node, color)
-        else:
+        try:
             self.nodes[node].update({ 'color': color })
-    
-    def color_edge(self, node1, node2):
+        except KeyError as e:
+            print('No node named {}'.format(e))
+
+    def color_edge(self, node1, node2, color):
         '''
-        
+        Colors an edge
+
+        Parameters
+        ----------
+        node1 : int
+            the first node of the edge
+
+        node2 : int
+            the second node of the edge
+
+        color : str
+            the color of the edge
         '''
+
 
 
 if __name__ == '__main__':
     graph = Graph()
-    graph.add_edge(0,1)
+    
+    graph.add_node(0)
     print(graph.nodes)
+
+    graph.color_node(1, 'green')
+
+    graph.add_edge(0,1,'blue', 17.0)
+    graph.add_edge(0,2)
 
     graph.color_node(0, 'blue')
     graph.color_node(1, 'red')
