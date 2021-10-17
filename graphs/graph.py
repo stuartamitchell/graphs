@@ -293,19 +293,3 @@ class Graph:
 
         return adjacency_matrix
 
-graph = Graph()
-
-for i in range(0,5):
-    graph.add_node()
-
-for i in range(0, 5):
-    for j in range(0, 5):
-        if i * j % 2 == 0:
-            graph.add_edge(i,j)
-
-print(graph.graph)
-
-adjacency = graph.adjacency()
-
-print(adjacency)
-print(graph.adjacency_matrix())
